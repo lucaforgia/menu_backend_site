@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Form dimmerda per post</title>
+	</head>
+	<body>
+		<h1>DIo quel maiale2</h1>
+		<form action="/aggiungi.html" id="aggiungi" method="POST" enctype="application/json">
+			<input type="text" name="cacca[nome]" value="puttana">
+			<input type="text" name="cacca[cognome]" value="eva">
+			<input type="submit" value="submitta" name="cacca[submit]">
+		</form>
+
+		
+		<script type="text/javascript" src="jquery/dist/jquery.js"></script>
+		<script type="text/javascript">
+			$('#aggiungi').on('submit',function(event){
+				event.preventDefault()
+
+				$.ajax({
+				    type: 'POST',
+				    url: '/aggiungi',
+				    data: '{"tier":{"title":"sssssss","href":null,"sort":1000000,"parent":null}}',
+				    success: function(data) { alert('data: ' + data); },
+				    contentType: "application/json",
+				    dataType: 'json'
+				});				
+			})
+		</script>
+	</body>
+</html>

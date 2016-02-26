@@ -1,0 +1,22 @@
+{
+  "name": "menu_backend_site",
+  "version": "1.0.0",
+  "description": "site for menu_backend emberjs app ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node ./index.js"
+  },
+  "author": "lucaf",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.14.0",
+    "compression": "^1.6.0",
+    "express": "^4.13.3",
+    "formidable": "^1.0.17",
+    "mongoose": "^4.1.7"
+  },
+  "devDependencies": {
+    "morgan": "^1.6.1"
+  }
+}
