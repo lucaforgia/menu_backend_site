@@ -4,8 +4,9 @@
   "description": "site for menu_backend emberjs app ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-	"start": "node ./index.js"
+    "start": "node ./index.js",
+    "test": "mocha ./tests/api.js",
+	"lint": "jshint ./index.js ./routes/api.js ./tests/api.js"
   },
   "author": "lucaf",
   "private": true,
@@ -17,6 +18,10 @@
     "mongoose": "^4.1.7"
   },
   "devDependencies": {
-    "morgan": "^1.6.1"
+    "jshint": "^2.9.1",
+    "lodash": "^4.5.1",
+    "mocha": "^2.4.5",
+    "morgan": "^1.6.1",
+    "supertest": "^1.2.0"
   }
 }
