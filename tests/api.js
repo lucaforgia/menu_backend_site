@@ -40,11 +40,11 @@ function getEntry(id) {
 }
 
 function createEntryWithParam(params) {
-		params = params || {};
+	params = params || {};
 
-		var title = params.title || 'tier-for-test',
-			href = params.href || '#testing',
-			sort = params.sort || null;
+	var title = params.title || 'tier-for-test',
+		href = params.href || '#testing',
+		sort = params.sort || null;
 
 	return function createEntry(parent){
 		return new Promise(function(resolve,reject){
@@ -194,10 +194,7 @@ describe('post /api/tiers', function(){
 	it('entry added to the DB', function (done) {
 		getEntry()
 		.then(createEntry)
-		.then(function(newEntry){
-			// chech if the tier really exist on the db
-			return getEntry(newEntry);
-		})
+		.then(getEntry) // chech if the tier really exist on the db
 		.then(function () {
 			done();
 		})
@@ -217,12 +214,11 @@ describe('post /api/tiers', function(){
 		})
 		.then(function (parent) {
 			//check if the new child really exist on the parent
-			if(parent.children.indexOf(childId) !== -1){
-				return parent;
-			}
-			else{
+			if(parent.children.indexOf(childId) === -1){
 				throw(new Error('children._id is not present in the parent.children array'));
+
 			}
+			return parent;
 		})
 		.then(function () {
 			done();
@@ -364,7 +360,7 @@ describe('delete /api/tiers', function(){
 		});
 	});
 
-	it('delete works, and removes all the test entries', function (done) {
+	it('it creates and entry, and then it removes all the test entries', function (done) {
 		var arr = testEntries.slice();
 
 
