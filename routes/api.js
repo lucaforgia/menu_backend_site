@@ -169,17 +169,18 @@ router.put('/*',function(req,res,next){
 		oldParent = Array.isArray(oldParent) ? oldParent[0] : oldParent;
 		var currentSort = oldParent.children.indexOf(res.locals.getEntryId(tier_id));
 
-		if(oldParentId === currentParentId && params.sort !== currentSort){
-			// same parent but different position, remove from the old position to add to the new;
-			oldParent.children.splice(currentSort,1);
-			oldParent.children.splice(params.sort, 0, res.locals.getEntryId(tier_id));
-			return oldParent.save();
-		}
-		else if(oldParentId !== currentParentId){
-			// different parents
-			oldParent.children.splice(currentSort,1);
+		if(params.sort){
+			if(oldParentId === currentParentId && params.sort !== currentSort){
+				// same parent but different position, remove from the old position to add to the new;
+				oldParent.children.splice(currentSort,1);
+				oldParent.children.splice(params.sort, 0, res.locals.getEntryId(tier_id));
+				return oldParent.save();
+			}
+			else if(oldParentId !== currentParentId){
+				// different parents
+				oldParent.children.splice(currentSort,1);
 
-			return oldParent.save()
+				return oldParent.save()
 				.then(function(){
 					return tiers.findById(params.parent);
 				})
@@ -188,9 +189,10 @@ router.put('/*',function(req,res,next){
 					newParent.children.splice(params.sort, 0, res.locals.getEntryId(tier_id));
 					return newParent.save();
 				});
-		}
-		else{
-			return this;
+			}
+			else{
+				return this;
+			}
 		}
 	})
 	.then(function(){
