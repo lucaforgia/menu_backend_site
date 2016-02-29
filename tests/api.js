@@ -6,7 +6,9 @@ var request = require('supertest'),
 	app = express.app,
 	server = express.server,
 	testEntries = [],
-	Promise = global.Promise;
+	Promise = global.Promise,
+	assert = require('chai').assert;
+
 
 function getEntry(id) {
 	return new Promise(function(resolve, reject){
@@ -56,19 +58,20 @@ function createEntryWithParam(params) {
 			.send({"tier":{"title":title,"href":href,parent:parentId,"sort":sort}})
 			.expect('Content-Type', /json/)
 			.expect(201)
+			.expect(function (res) {
+				if(res.body.tier){
+					testEntries.push(res.body.tier._id);
+				}
+				assert.equal(res.body.tier.title, title);
+				assert.equal(res.body.tier.href, href);
+				assert.equal(res.body.tier.parent, parentId);
+			})
 			.end(function(err, res){
-				var newEntry = res.body.tier;
-				if(newEntry){
-					testEntries.push(newEntry._id);
-				}
 				if(err){
-					reject(err);
-				}
-				else if(newEntry.title !== title || newEntry.href !== href || newEntry.parent !== parentId){
-					reject(new Error('Entry created different than entry returned'));
+					return reject(err);
 				}
 				else{
-					resolve(newEntry);
+					resolve(res.body.tier);
 				}
 			});
 		});
@@ -76,15 +79,14 @@ function createEntryWithParam(params) {
 }
 
 function deleteEntry(id) {
-	if(!id){
-		throw('deleteEntry need one parameter');
-	}
 	id = typeof id === 'string' ? id : id._id;
 	return new Promise(function (resolve, reject) {
 		request(app)
 			.delete('/api/tiers/'+id)
 			.expect(function (res) {
-				return res.status === 204 || res.status === 304;
+				if(res.status !== 204 && res.status !== 304){
+					throw(new Error('Status is '+ res.status));
+				}
 			})
 			.end(function(err, res){
 				if(err){
@@ -94,7 +96,7 @@ function deleteEntry(id) {
 					_.remove(testEntries,function (ele) {
 						return ele === id;
 					});
-					resolve();
+					resolve(id);
 				}
 			});
 	});
@@ -109,7 +111,9 @@ function updateEntry(id,params) {
 			.expect(200)
 			.expect('Content-Type', /json/)
 			.expect(function (res) {
-				return res && res.body && res.body.tiers;
+				if(!res.body && !res.body.tiers){
+					throw(new Error('response content is not correct'));
+				}
 			})
 			.end(function(err, res){
 				if(err){
@@ -133,7 +137,9 @@ describe('GET /api/tiers', function(){
 			.get('/api/tiers/')
 			.expect('Content-Type', /json/)
 			.expect(function (res) {
-				return res && res.body && res.body.tiers;
+				if(!res.body && !res.body.tiers){
+					throw(new Error('response content is not correct'));
+				}
 			})
 			.expect(200, done);
 	});
@@ -150,7 +156,9 @@ describe('GET /api/tiers', function(){
 					.get('/api/tiers/'+entry._id)
 					.expect('Content-Type', /json/)
 					.expect(function (res) {
-						return res && res.body && res.body.tier && res.body.tier._id === entry._id;
+						if(!res.body && !res.body.tier && res.body.tier._id !== entry._id){
+							throw(new Error('response content is not correct'));
+						}
 					})
 					.end(function(err, res){
 						if(err){
@@ -216,7 +224,6 @@ describe('post /api/tiers', function(){
 			//check if the new child really exist on the parent
 			if(parent.children.indexOf(childId) === -1){
 				throw(new Error('children._id is not present in the parent.children array'));
-
 			}
 			return parent;
 		})
@@ -313,19 +320,13 @@ describe('put /api/tiers', function(){
 				firstParent = _.find(tiers, {_id:firstParentId}),
 				isStillInFirstParent = firstParent.children.indexOf(entryId) !== -1;
 
-			if(!entry){
-				throw(new Error('entry not found'));
-			}
-			if(index !== 1){
-				throw(new Error('index is wrong'));
-			}
-			if(isStillInFirstParent){
-				throw(new Error('id child still in old parent'));
-			}
-			if(entry.title !== 'modified' || entry.href !== '#modified' || entry.parent !== secondParentId){
-				throw(new Error('entry not correctly changed'));
-			}
-			return true;
+			assert.isOk(entry, 'entry not found');
+			assert.equal(index, 1, 'index of the entry');
+			assert.isNotTrue(isStillInFirstParent, 'id child still in old parent');
+			assert.equal(entry.title, 'modified', 'title');
+			assert.equal(entry.href, '#modified', 'href');
+			assert.equal(entry.parent, secondParentId, 'parent');
+
 		})
 		.then(function () {
 			done();
@@ -339,10 +340,46 @@ describe('put /api/tiers', function(){
 
 describe('delete /api/tiers', function(){
 	it('304 because entry doesn\'t exist (wrong id)', function (done) {
+		request(app)
+			.delete('/api/tiers/procione')
+			.expect(304, done);
+	});
+
+	it('it creates and entry, it removes it, and check the presence on the db', function (done) {
+
+		getEntry()
+		.then(createEntry)
+		.then(deleteEntry)
+		.then(function (id) {
+			return new Promise(function(resolve, reject){
+				request(app)
+					.get('/api/tiers/' + id)
+					.expect(404)
+					.end(function(err, res){
+						if(err){
+							reject(err);
+						}
+						else{
+							resolve();
+						}
+					});
+			});
+		})
+		.then(function () {
+			done();
+		})
+		.catch(function(err){
+			done(err);
+		});
+	});
+});
+
+describe('get /api/fill-standard', function(){
+	it('it reset the db', function (done) {
 		new Promise(function (resolve, reject) {
 			request(app)
-				.delete('/api/tiers/procione')
-				.expect(304)
+				.get('/api/fill-standard')
+				.expect(200)
 				.end(function(err, res){
 					if(err){
 						reject(err);
@@ -353,22 +390,26 @@ describe('delete /api/tiers', function(){
 				});
 		})
 		.then(function () {
-			done();
-		})
-		.catch(function(err){
-			done(err);
-		});
-	});
-
-	it('it creates and entry, and then it removes all the test entries', function (done) {
-		var arr = testEntries.slice();
-
-
-		arr.reduce(function (returned, ele) {
-			return returned.then(function(){
-				return deleteEntry(ele);
+			return new Promise(function(resolve, reject){
+				request(app)
+					.get('/api/tiers/')
+					.expect('Content-Type', /json/)
+					.expect(200)
+					.expect(function (res) {
+						var entries = res.body.tiers;
+						assert.isOk(_.find(entries, {"title":'last tier'}));
+						assert.equal(entries.length, 8);
+					})
+					.end(function(err, res){
+						if(err){
+							reject(new Error('db changed badly ' + err));
+						}
+						else{
+							resolve();
+						}
+					});
 			});
-		}, getEntry().then(createEntry))
+		})
 		.then(function () {
 			done();
 		})
@@ -377,7 +418,5 @@ describe('delete /api/tiers', function(){
 		});
 	});
 });
-
-// check if parent has added the children; check if removing a parent you remove also the children
 
 server.close();

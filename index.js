@@ -17,12 +17,12 @@ app.use(express.static('public'));
 app.use(express.static('bower_components'));
 // app.use(morgan('combined'));
 app.use(bodyParser.json());
-// app.use(function(req,res,next){
-// 	res.header("Access-Control-Allow-Origin", "*");
-// 	res.header("Access-Control-Allow-Methods","POST, GET, OPTIONS, PUT, DELETE");
-// 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-// 	next();
-// });
+app.use(function(req,res,next){
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Methods","POST, GET, OPTIONS, PUT, DELETE");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/menu_backend');
 var db = mongoose.connection;
@@ -42,7 +42,7 @@ var TierSchema = new mongoose.Schema({
 var Tiers = mongoose.model('tiers', TierSchema);
 app.use(function(req,res,next){
 	res.locals.tiers = Tiers;
-	res.locals.mongoose = mongoose;
+	res.locals.getEntryId = mongoose.Types.ObjectId;
 	next();
 });
 
@@ -56,7 +56,7 @@ app.use(function(req,res,next){
 var tiers_root = '/api/tiers/';
 app.use(tiers_root,require('./routes/api')); // api for change database
 
-app.use('/api/fill_standard', require('./routes/reset_database')); // reset database
+app.use('/api/fill-standard', require('./routes/reset_database')); // reset database
 
 app.all('*',function(req,res,next){
 	res.send('page not found');

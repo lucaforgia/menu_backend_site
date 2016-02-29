@@ -3,9 +3,8 @@
 var express = require("express");
 var router = express.Router();
 
-function returnCompleteTiers(tiers, res, err){
+function returnCompleteTiers(tiers, res){
 	var resJson = {};
-	err = err || function(){};
 	return tiers.find({})
 		.then(function(all){
 			res.status(200);
@@ -32,6 +31,9 @@ router.get('/*',function(req,res,next){
 	var tier_id = url_arr[url_arr.length - 1];
 	tiers.findById(tier_id)
 	.then(function (entry) {
+		if(!entry){
+			throw(new Error('entry not found'));
+		}
 		res.status(200);
 		res.send({"tier":entry});
 		res.end();
@@ -49,9 +51,9 @@ router.post("/",function(req,res,next){
 	var tiers = res.locals.tiers;
 	var params = req.body.tier;
 	var parent_id;
-	var mongoose = res.locals.mongoose;
-	var newTierId = mongoose.Types.ObjectId();
+	var newTierId = res.locals.getEntryId();
 	var resJson = {};
+	var href = params.href && params.href.replace(/[ ]g/, '') !== '' ? params.href : '#null' ;
 	var newTier;
 
 	var title = params.title && params.title !== '' ? params.title : 'da riempire';
@@ -68,9 +70,9 @@ router.post("/",function(req,res,next){
 			return tiers.create({
 				_id:newTierId,
 				title:title,
-				href:params.href,
+				href:href,
 				children:params.children || [],
-				parent:mongoose.Types.ObjectId(params.parent)
+				parent:res.locals.getEntryId(params.parent)
 			});
 		})
 		.then(function(newTier){
@@ -94,7 +96,6 @@ router.delete("/*",function(req,res,next){
 	var url_arr = req.originalUrl.split('/');
 	var tier_id = url_arr[url_arr.length - 1];
 	var currentTier;
-	var mongoose = res.locals.mongoose;
 
 	var removeAll = function(id){
 		// remove all also descendant
@@ -117,7 +118,7 @@ router.delete("/*",function(req,res,next){
 	removeAll(tier_id)
 	.then(function(){
 		// searc the parent
-		return tiers.find({children:mongoose.Types.ObjectId(tier_id)});
+		return tiers.find({children:res.locals.getEntryId(tier_id)});
 	})
 	.then(function(parent){
 		// remove the id from the parent "children" array
@@ -143,7 +144,6 @@ router.delete("/*",function(req,res,next){
 
 
 router.put('/*',function(req,res,next){
-	var mongoose = res.locals.mongoose;
 	var tiers = res.locals.tiers;
 	var tiers_arr = req.originalUrl.split('/');
 	var tier_id = tiers_arr[tiers_arr.length - 1];
@@ -157,22 +157,22 @@ router.put('/*',function(req,res,next){
 		currentParentId = params.parent;
 		tier.href = params.href;
 		tier.title = params.title;
-		tier.parent = mongoose.Types.ObjectId(params.parent);
+		tier.parent = res.locals.getEntryId(params.parent);
 
 		return tier.save();
 	})
 	.then(function(){
 		// cerca old parent;
-		return tiers.find({children:mongoose.Types.ObjectId(tier_id)});
+		return tiers.find({children:res.locals.getEntryId(tier_id)});
 	})
 	.then(function(oldParent){
 		oldParent = Array.isArray(oldParent) ? oldParent[0] : oldParent;
-		var currentSort = oldParent.children.indexOf(mongoose.Types.ObjectId(tier_id));
+		var currentSort = oldParent.children.indexOf(res.locals.getEntryId(tier_id));
 
 		if(oldParentId === currentParentId && params.sort !== currentSort){
 			// same parent but different position, remove from the old position to add to the new;
 			oldParent.children.splice(currentSort,1);
-			oldParent.children.splice(params.sort, 0, mongoose.Types.ObjectId(tier_id));
+			oldParent.children.splice(params.sort, 0, res.locals.getEntryId(tier_id));
 			return oldParent.save();
 		}
 		else if(oldParentId !== currentParentId){
@@ -185,7 +185,7 @@ router.put('/*',function(req,res,next){
 				})
 				.then(function(newParent){
 					newParent = Array.isArray(newParent) ? newParent[0] : newParent;
-					newParent.children.splice(params.sort, 0, mongoose.Types.ObjectId(tier_id));
+					newParent.children.splice(params.sort, 0, res.locals.getEntryId(tier_id));
 					return newParent.save();
 				});
 		}

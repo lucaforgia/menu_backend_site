@@ -1,21 +1,23 @@
+"use strict";
+
 var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req,res,next){
 
 	var tiers = res.locals.tiers;
-	var mongoose = res.locals.mongoose;
+	var getEntryId = res.locals.getEntryId;
 
-	var rootId = mongoose.Types.ObjectId();
+	var rootId = getEntryId();
 
 	var ObjectIds = [
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
-		mongoose.Types.ObjectId(),
+		getEntryId(),
+		getEntryId(),
+		getEntryId(),
+		getEntryId(),
+		getEntryId(),
+		getEntryId(),
+		getEntryId(),
 	];
 
 
@@ -65,24 +67,23 @@ router.get('/', function(req,res,next){
 		},
 		{
 			_id:ObjectIds[6],
-			title:"seventh tier",
+			title:"last tier",
 			href:'#seventh',
 			parent:ObjectIds[5],
 		}
 	];
 
 
-	
+
 	newTiersObj.reduce(function(memo,current){
-		return memo.then(
-			function(item){
-				return new tiers(current).save();
-			}
-		);	
+		return memo.then(function(item){
+			return new tiers(current).save();
+		});
 	}, tiers.remove({}))
 	.then(function(){
-		res.locals.returnCompleteTiers(tiers,res);	
-	})
+		res.status(200);
+		res.end('ok');
+	});
 });
 
 
