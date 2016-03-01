@@ -1,0 +1,89 @@
+#nav-content {
+  text-align: center;
+}
+#nav-content .newTier,
+#nav-content #tierCarousel .nextTier,
+#nav-content #tierCarousel .prevTier {
+  height: 403px;
+  background-color: #ccc;
+  z-index: 1;
+  width: 249px;
+  position: absolute;
+  top: 0px;
+}
+#nav-content #nav-content-bg {
+  display: inline-block;
+  width: 286px;
+  height: 600px;
+  background-image: url("../images/apple-iphone-5s.png");
+  background-repeat: no-repeat;
+}
+#nav-content #nav-content-bg > div {
+  overflow: hidden;
+  margin-top: 85px;
+  background-color: #ccc;
+  width: 249px;
+  height: 433px;
+  display: inline-block;
+  margin-left: 3px;
+}
+#nav-content #nav-content-bg > div > div {
+  text-align: left;
+}
+#nav-content .header {
+  background-color: #000;
+  height: 30px;
+  line-height: 30px;
+  padding: 0px 10px;
+}
+#nav-content .header div {
+  float: right;
+}
+#nav-content .header div:first-child {
+  float: left;
+}
+#nav-content .header div:last-child {
+  clear: both;
+}
+#nav-content .header img {
+  height: 20px;
+  padding-top: 5px;
+}
+#nav-content #tierCarousel {
+  height: 403px;
+  position: relative;
+}
+#nav-content #tierCarousel .currentTier {
+  height: 403px;
+  z-index: 0;
+  background-color: #ccc;
+}
+#nav-content #tierCarousel .nextTier {
+  left: 249px;
+}
+#nav-content #tierCarousel .prevTier {
+  left: -249px;
+}
+#nav-content #tierCarousel .move {
+  transition: left 0.3s;
+  left: 0px;
+}
+#nav-content #tierCarousel .cat-tier {
+  padding: 15px 5px;
+  font-weight: bold;
+  text-align: center;
+}
+#nav-content #tierCarousel ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+#nav-content #tierCarousel ul li {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 5px 10px 15px;
+  border-top: 2px solid #fff;
+}
+#nav-content #tierCarousel ul li:last-child {
+  border-bottom: 2px solid #000;
+}

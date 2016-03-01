@@ -1,0 +1,79 @@
+phone_bg_color = #ccc
+inner_width = 249px
+time_transition = 0.3s
+inner_h = 433px
+header_h = 30px
+slider_h = inner_h - header_h
+bg_tier = phone_bg_color
+
+#nav-content
+	.newTier
+		height slider_h
+		background-color bg_tier
+		z-index 1
+		width inner_width
+		position absolute
+		top 0px
+
+	text-align center
+	#nav-content-bg
+		display inline-block
+		width 286px
+		height 600px
+		background-image url("../images/apple-iphone-5s.png")
+		background-repeat no-repeat
+		> div
+			overflow hidden
+			margin-top 85px
+			background-color phone_bg_color
+			width inner_width
+			height inner_h
+			display inline-block
+			margin-left 3px
+			> div
+				text-align left
+	.header
+		background-color #000
+		height header_h
+		line-height header_h
+		padding 0px 10px
+		div
+			float right
+		div:first-child
+			float left
+		div:last-child
+			clear both
+		img
+			height 20px
+			padding-top 5px
+	#tierCarousel
+		height slider_h
+		position relative
+		.currentTier
+			height slider_h
+			z-index 0
+			background-color bg_tier
+		.nextTier
+			@extend #nav-content .newTier
+			left inner_width
+		.prevTier
+			@extend #nav-content .newTier
+			left -(inner_width)
+		.move
+			transition: left time_transition;
+			left 0px
+		.cat-tier
+			padding 15px 5px
+			font-weight bold
+			text-align center
+		ul
+			list-style-type none
+			padding 0px
+			margin 0px
+			li
+				background-color #333333
+				color #fff
+				padding 10px 5px 10px 15px
+				border-top 2px solid white
+				&:last-child
+					border-bottom 2px solid black

@@ -169,7 +169,7 @@ router.put('/*',function(req,res,next){
 		oldParent = Array.isArray(oldParent) ? oldParent[0] : oldParent;
 		var currentSort = oldParent.children.indexOf(res.locals.getEntryId(tier_id));
 
-		if(params.sort){
+		if(typeof params.sort !== 'null' && typeof params.sort !== 'undefined'){
 			if(oldParentId === currentParentId && params.sort !== currentSort){
 				// same parent but different position, remove from the old position to add to the new;
 				oldParent.children.splice(currentSort,1);

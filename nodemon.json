@@ -1,0 +1,8 @@
+{
+	"watch": [
+		"./",
+		"tests/",
+		"public/",
+		"routes"
+	]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "menu_backend_site",
+  "description": "site for menu_backend emberjs app",
+  "main": "index.js",
+  "authors": [
+    "lucaf"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/lucaforgia/menu_backend_site",
+  "moduleType": [
+    "globals"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "react": "^0.14.7"
+  }
+}
